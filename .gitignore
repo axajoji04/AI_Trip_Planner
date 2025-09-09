@@ -7,9 +7,14 @@ wheels/
 *.egg-info
 
 # Virtual environments
-.venv
-env
-.env".env" 
+.venv/
+env/
+myenv/
+venv/
 
+# Environment variables
 .env
+
+# Local repos
 cleaned-repo/
+
