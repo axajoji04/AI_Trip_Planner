@@ -4,8 +4,8 @@ from langgraph.graph import StateGraph, MessagesState, END, START
 from langgraph.prebuilt import ToolNode, tools_condition
 from tools.weather_info_tool import WeatherInfoTool
 from tools.place_search_tool import PlaceSearchTool
-from tools.expense_calculator_tool import Calculator
-from tools.currency_conversion_tool import CurrencyConverter
+from tools.expense_calculator_tool import CalculatorTool
+from tools.currency_conversion_tool import CurrencyConverterTool
 
 
 
@@ -18,8 +18,8 @@ class GraphBuilder():
         
         self.weather_tools = WeatherInfoTool()
         self.place_search_tools = PlaceSearchTool()
-        self.calculator_tools = Calculator()
-        self.currency_converter_tools = CurrencyConverter()
+        self.calculator_tools = CalculatorTool()
+        self.currency_converter_tools = CurrencyConverterTool()
         
         self.tools.extend([* self.weather_tools.weather_tool_list, 
                            * self.place_search_tools.place_search_tool_list,
@@ -52,3 +52,4 @@ class GraphBuilder():
         
     def __call__(self):
         return self.build_graph()
+    

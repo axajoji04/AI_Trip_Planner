@@ -10,18 +10,45 @@ class CalculatorTool:
     def _setup_tools(self) -> List:
         """Setup all tools for the calculator tool"""
         @tool
-        def estimate_total_hotel_cost(price_per_night:str, total_days:float) -> float:
-            """Calculate total hotel cost"""
-            return self.calculator.multiply(price_per_night, total_days)
+        def estimate_total_hotel_cost(price_per_night: float, total_days: float) -> float:
+            """
+            Calculate total hotel cost for a trip.
+            
+            Args:
+                price_per_night: Cost per night for accommodation
+                total_days: Total number of days
+            
+            Returns:
+                Total hotel cost for the entire stay
+            """
+            return self.calculator.multiply(int(price_per_night), int(total_days))
         
         @tool
         def calculate_total_expense(*costs: float) -> float:
-            """Calculate total expense of the trip"""
+            """
+            Calculate total expense of the trip by summing all individual costs.
+            
+            Args:
+                *costs: Variable number of cost amounts
+            
+            Returns:
+                Sum of all expenses
+            """
             return self.calculator.calculate_total(*costs)
         
         @tool
         def calculate_daily_expense_budget(total_cost: float, days: int) -> float:
-            """Calculate daily expense"""
+            """
+            Calculate daily expense budget by dividing total cost by number of days.
+            
+            Args:
+                total_cost: Total budget for the trip
+                days: Number of days for the trip
+            
+            Returns:
+                Daily budget amount
+            """
             return self.calculator.calculate_daily_budget(total_cost, days)
         
         return [estimate_total_hotel_cost, calculate_total_expense, calculate_daily_expense_budget]
+    
