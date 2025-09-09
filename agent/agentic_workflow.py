@@ -2,10 +2,10 @@ from utils.model_loader import ModelLoader
 from prompt_library.prompt import SYSTEM_PROMPT
 from langgraph.graph import StateGraph, MessagesState, END, START
 from langgraph.prebuilt import ToolNode, tools_condition
-#from tools.weather_info_tool import weather_info_tool
-#from tools.place_search_tool import place_search_tool
-#from tools.expense_calculator_tool import calculator_tool
-#from tools.currency_conversion_tool import currency_conversion_tool
+from tools.weather_info_tool import WeatherInfoTool
+from tools.place_search_tool import PlaceSearchTool
+from tools.expense_calculator_tool import Calculator
+from tools.currency_conversion_tool import CurrencyConverter
 
 
 
@@ -18,8 +18,8 @@ class GraphBuilder():
         
         self.weather_tools = WeatherInfoTool()
         self.place_search_tools = PlaceSearchTool()
-        self.calculator_tools = CalculatorTool()
-        self.currency_converter_tools = CurrencyConverterTool()
+        self.calculator_tools = Calculator()
+        self.currency_converter_tools = CurrencyConverter()
         
         self.tools.extend([* self.weather_tools.weather_tool_list, 
                            * self.place_search_tools.place_search_tool_list,
