@@ -27,7 +27,7 @@ def initialize_page_config():
     """Initialize page config safely"""
     try:
         st.set_page_config(
-            page_title="✈️ AI Travel Companion",
+            page_title="AI Travel Companion",
             page_icon="✈️",
             layout="wide",
             initial_sidebar_state="collapsed",
@@ -36,8 +36,8 @@ def initialize_page_config():
         logger.warning(f"Page config already set: {e}")
         pass
 
-def load_custom_css():
-    """Load enhanced custom CSS styling"""
+def load_clean_custom_css():
+    """Load clean CSS styling for professional presentation"""
     css_content = """
     <style>
         /* Hide default Streamlit elements */
@@ -45,268 +45,163 @@ def load_custom_css():
         footer {visibility: hidden;}
         header {visibility: hidden;}
         
-        /* Main container styling */
-        .main-container {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 20px;
-            padding: 2rem;
-            margin: 1rem 0;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-        }
-        
-        /* Menu button grid */
-        .menu-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 1.5rem;
-            margin: 2rem 0;
-        }
-        
-        /* Menu option cards */
-        .menu-option {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 15px;
-            padding: 2rem;
-            text-align: center;
-            color: white;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-            border: none;
-            text-decoration: none;
-        }
-        
-        .menu-option:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 30px rgba(0,0,0,0.3);
-            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
-        }
-        
-        .menu-icon {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-            display: block;
-        }
-        
-        .menu-title {
-            font-size: 1.3rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-        }
-        
-        .menu-description {
-            font-size: 0.9rem;
-            opacity: 0.9;
-            line-height: 1.4;
-        }
-        
-        /* Content display cards */
-        .content-card {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            border-radius: 20px;
-            padding: 2.5rem;
-            margin: 2rem 0;
-            color: white;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            animation: slideInUp 0.5s ease-out;
-        }
-        
-        .content-header {
-            text-align: center;
-            border-bottom: 2px solid rgba(255,255,255,0.3);
-            padding-bottom: 1.5rem;
-            margin-bottom: 2rem;
-        }
-        
-        .content-header h1 {
-            font-size: 2.5rem;
-            margin-bottom: 0.5rem;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-        }
-        
-        /* Specific content type cards */
-        .itinerary-card {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            border-radius: 15px;
-            padding: 2rem;
-            margin: 1.5rem 0;
-            color: white;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-        }
-        
-        .hotel-card {
-            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
-            border-radius: 15px;
-            padding: 2rem;
-            margin: 1.5rem 0;
-            color: white;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-        }
-        
-        .cost-card {
-            background: linear-gradient(135deg, #96c93d 0%, #00b09b 100%);
-            border-radius: 15px;
-            padding: 2rem;
-            margin: 1.5rem 0;
-            color: white;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-        }
-        
-        .weather-card {
-            background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
-            border-radius: 15px;
-            padding: 2rem;
-            margin: 1.5rem 0;
-            color: white;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-        }
-        
-        .alternative-card {
-            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
-            border-radius: 15px;
-            padding: 2rem;
-            margin: 1.5rem 0;
+        /* Clean professional styling */
+        .clean-content {
+            font-family: 'Times New Roman', serif;
+            font-size: 14px;
+            line-height: 1.8;
             color: #333;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin: 1rem 0;
         }
         
-        /* Back button */
-        .back-button {
-            background: linear-gradient(135deg, #fd79a8 0%, #fdcb6e 100%);
-            color: white;
-            border: none;
-            border-radius: 25px;
-            padding: 0.8rem 2rem;
+        .clean-heading {
+            font-family: 'Times New Roman', serif;
+            font-size: 16px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin: 20px 0 10px 0;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .clean-subheading {
+            font-family: 'Times New Roman', serif;
+            font-size: 15px;
             font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-bottom: 2rem;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            color: #34495e;
+            margin: 15px 0 8px 0;
         }
         
-        .back-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        .clean-text {
+            font-family: 'Times New Roman', serif;
+            font-size: 14px;
+            line-height: 1.7;
+            color: #2c3e50;
+            margin: 8px 0;
         }
         
-        /* Currency converter */
-        .currency-converter {
-            background: linear-gradient(135deg, #fdcb6e 0%, #e17055 100%);
-            border-radius: 15px;
+        .clean-day-section {
+            background: #f8f9fa;
+            border-left: 4px solid #007bff;
             padding: 1.5rem;
             margin: 1rem 0;
-            color: white;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            text-align: center;
+            border-radius: 5px;
         }
         
-        /* Animations */
-        @keyframes slideInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        
-        .fade-in {
-            animation: fadeIn 0.5s ease-out;
-        }
-        
-        /* Button improvements */
-        .stButton > button {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        .clean-button {
+            background-color: #6c757d;
             color: white;
             border: none;
-            border-radius: 25px;
-            padding: 0.7rem 2rem;
+            border-radius: 5px;
+            padding: 0.7rem 1.5rem;
+            font-family: 'Times New Roman', serif;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        
+        .clean-button:hover {
+            background-color: #5a6268;
+        }
+        
+        /* Simple header styling */
+        .simple-header {
+            text-align: center;
+            padding: 1.5rem;
+            background: #f8f9fa;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            border: 1px solid #dee2e6;
+        }
+        
+        .simple-header h1 {
+            font-family: 'Times New Roman', serif;
+            font-size: 20px;
+            color: #2c3e50;
+            margin: 0;
             font-weight: 600;
-            transition: all 0.3s ease;
+        }
+        
+        /* Clean list styling */
+        .clean-list-item {
+            font-family: 'Times New Roman', serif;
+            font-size: 14px;
+            line-height: 1.6;
+            color: #2c3e50;
+            margin: 5px 0;
+            padding-left: 20px;
+            position: relative;
+        }
+        
+        .clean-list-item::before {
+            content: "•";
+            position: absolute;
+            left: 0;
+            color: #007bff;
+        }
+        
+        /* Price highlighting */
+        .price-highlight {
+            background: #fff3cd;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-weight: 600;
+        }
+
+        /* Main container styling - simplified */
+        .main-container {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 2rem;
+            margin: 1rem 0;
+            border: 1px solid #dee2e6;
+        }
+        
+        /* Menu button styling - clean */
+        .stButton > button {
+            background-color: #6c757d;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 0.7rem 1.5rem;
+            font-family: 'Times New Roman', serif;
+            font-weight: normal;
+            transition: background-color 0.3s ease;
             width: 100%;
         }
         
         .stButton > button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 7px 20px rgba(0,0,0,0.3);
+            background-color: #5a6268;
         }
         
-        /* Responsive design */
-        @media (max-width: 768px) {
-            .menu-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .content-card {
-                margin: 1rem 0;
-                padding: 1.5rem;
-            }
-            
-            .content-header h1 {
-                font-size: 2rem;
-            }
+        /* Currency converter - clean */
+        .currency-converter {
+            background: #e9ecef;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            color: #2c3e50;
+            text-align: center;
+            border: 1px solid #dee2e6;
         }
         
-        /* Loading spinner */
+        /* Loading spinner - clean */
         .loading-spinner {
             display: inline-block;
             width: 30px;
             height: 30px;
-            border: 3px solid rgba(255,255,255,0.3);
+            border: 3px solid #dee2e6;
             border-radius: 50%;
-            border-top-color: white;
+            border-top-color: #007bff;
             animation: spin 1s ease-in-out infinite;
         }
         
         @keyframes spin {
             to { transform: rotate(360deg); }
-        }
-        
-        /* Day cards in itinerary */
-        .day-section {
-            background: rgba(255,255,255,0.15);
-            border-radius: 12px;
-            padding: 1.5rem;
-            margin: 1rem 0;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.2);
-        }
-        
-        .day-header {
-            font-size: 1.4rem;
-            font-weight: 700;
-            margin-bottom: 1rem;
-            color: white;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
-        }
-        
-        /* Cost breakdown styling */
-        .cost-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0.8rem;
-            background: rgba(255,255,255,0.1);
-            border-radius: 8px;
-            margin: 0.5rem 0;
-            backdrop-filter: blur(5px);
-        }
-        
-        .cost-total {
-            background: rgba(255,255,255,0.2);
-            border-radius: 10px;
-            padding: 1rem;
-            margin-top: 1rem;
-            font-size: 1.2rem;
-            font-weight: 700;
-            text-align: center;
         }
     </style>
     """
@@ -314,7 +209,7 @@ def load_custom_css():
     try:
         st.markdown(css_content, unsafe_allow_html=True)
     except Exception as e:
-        logger.error(f"CSS loading error: {e}")
+        logger.error(f"Clean CSS loading error: {e}")
 
 def init_session_state():
     """Initialize session state variables safely"""
@@ -458,44 +353,68 @@ def make_api_request(user_input: str, request_type: str = "complete") -> Optiona
             error_msg = f"Server returned status {response.status_code}"
             if response.text:
                 error_msg += f": {response.text[:200]}"
-            st.error(f"🚫 **Server Error**: {error_msg}")
+            st.error(f"Server Error: {error_msg}")
             return None
             
     except requests.exceptions.ConnectionError as e:
         logger.error(f"Connection error: {e}")
-        st.error("🔌 **Connection Error**: Unable to connect to the travel planning service.")
+        st.error("Connection Error: Unable to connect to the travel planning service.")
         if "localhost" in BASE_URL:
-            st.info("💡 **Tip**: Make sure your backend server is running locally, or update the BACKEND_URL environment variable.")
+            st.info("Tip: Make sure your backend server is running locally, or update the BACKEND_URL environment variable.")
         return None
         
     except requests.exceptions.Timeout as e:
         logger.error(f"Timeout error: {e}")
-        st.error(f"⏰ **Timeout Error**: Request took longer than {TIMEOUT} seconds. Please try again.")
+        st.error(f"Timeout Error: Request took longer than {TIMEOUT} seconds. Please try again.")
         return None
         
     except requests.exceptions.RequestException as e:
         logger.error(f"Request error: {e}")
-        st.error(f"🌐 **Network Error**: {str(e)[:200]}")
+        st.error(f"Network Error: {str(e)[:200]}")
         return None
         
     except json.JSONDecodeError as e:
         logger.error(f"JSON decode error: {e}")
-        st.error("📄 **Response Error**: Invalid response format from server.")
+        st.error("Response Error: Invalid response format from server.")
         return None
         
     except Exception as e:
         logger.error(f"Unexpected error: {e}")
-        st.error(f"❌ **Unexpected Error**: {str(e)[:200]}")
+        st.error(f"Unexpected Error: {str(e)[:200]}")
         return None
+
+def clean_content_from_markdown(content: str) -> str:
+    """Remove markdown formatting and clean up content"""
+    # Remove markdown headers (# ## ### ####)
+    content = re.sub(r'^#{1,6}\s*', '', content, flags=re.MULTILINE)
+    
+    # Remove markdown bold (**text** or __text__)
+    content = re.sub(r'\*\*(.*?)\*\*', r'\1', content)
+    content = re.sub(r'__(.*?)__', r'\1', content)
+    
+    # Remove markdown italic (*text* or _text_)
+    content = re.sub(r'\*(.*?)\*', r'\1', content)
+    content = re.sub(r'_(.*?)_', r'\1', content)
+    
+    # Remove markdown lists (- or * at start of line)
+    content = re.sub(r'^[-\*]\s*', '', content, flags=re.MULTILINE)
+    
+    # Remove extra dashes/separators
+    content = re.sub(r'^-+$', '', content, flags=re.MULTILINE)
+    
+    # Clean up multiple newlines
+    content = re.sub(r'\n\s*\n\s*\n+', '\n\n', content)
+    
+    return content.strip()
 
 def display_welcome_screen():
     """Display welcome screen"""
     try:
         st.markdown("""
         <div class="main-container">
-            <div style="text-align: center; color: white; margin-bottom: 2rem;">
-                <div style="font-size: 3rem; font-weight: 700; margin-bottom: 0.5rem; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">✈️ AI Travel Companion</div>
-                <div style="font-size: 1.2rem; opacity: 0.9; font-weight: 300;">Your intelligent travel planning assistant with interactive menu-driven experience</div>
+            <div style="text-align: center; color: #2c3e50; margin-bottom: 2rem;">
+                <div style="font-size: 2.5rem; font-weight: 600; margin-bottom: 0.5rem; font-family: 'Times New Roman', serif;">AI Travel Companion</div>
+                <div style="font-size: 1.1rem; color: #6c757d; font-family: 'Times New Roman', serif;">Your intelligent travel planning assistant</div>
             </div>
         </div>
         """, unsafe_allow_html=True)
@@ -504,38 +423,35 @@ def display_welcome_screen():
         col1, col2, col3 = st.columns(3)
         
         features = [
-            ("🎯", "Interactive Menus", "Choose specific aspects of your trip to explore in detail"),
-            ("💱", "Smart Currency Conversion", "Automatic price conversion to your preferred currency"),
-            ("🎨", "Beautiful Displays", "Organized, emoji-rich presentations for easy reading")
+            ("Interactive Menus", "Choose specific aspects of your trip to explore in detail"),
+            ("Currency Conversion", "Automatic price conversion to your preferred currency"),
+            ("Clean Presentation", "Professional, easy-to-read format for all travel information")
         ]
         
-        for i, (icon, title, description) in enumerate(features):
+        for i, (title, description) in enumerate(features):
             with [col1, col2, col3][i]:
                 st.markdown(f"""
-                <div style="background: rgba(255,255,255,0.1); border-radius: 15px; padding: 1.5rem; margin: 1rem; text-align: center; color: white; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2);">
-                    <div style="font-size: 2.5rem; margin-bottom: 1rem;">{icon}</div>
-                    <h3>{title}</h3>
-                    <p>{description}</p>
+                <div style="background: #f8f9fa; border-radius: 10px; padding: 1.5rem; margin: 1rem; text-align: center; color: #2c3e50; border: 1px solid #dee2e6;">
+                    <h4 style="font-family: 'Times New Roman', serif; margin-bottom: 1rem;">{title}</h4>
+                    <p style="font-family: 'Times New Roman', serif; font-size: 14px;">{description}</p>
                 </div>
                 """, unsafe_allow_html=True)
                 
     except Exception as e:
         logger.error(f"Welcome screen error: {e}")
-        st.title("✈️ AI Travel Companion")
+        st.title("AI Travel Companion")
         st.write("Your intelligent travel planning assistant")
 
 def display_menu():
     """Display the interactive menu after getting travel data"""
-    st.markdown("""
-    <div class="content-card">
-        <div class="content-header">
-            <h1>🎯 Choose What You'd Like to Explore</h1>
-            <p style="font-size: 1.1rem; margin-top: 1rem;">
-                Your travel query: <strong>"{}"</strong>
-            </p>
-        </div>
+    st.markdown(f"""
+    <div class="simple-header">
+        <h1>Choose What You'd Like to Explore</h1>
+        <p style="font-size: 14px; margin-top: 1rem; font-family: 'Times New Roman', serif;">
+            Your travel query: <strong>"{st.session_state.user_query}"</strong>
+        </p>
     </div>
-    """.format(st.session_state.user_query), unsafe_allow_html=True)
+    """, unsafe_allow_html=True)
     
     # Create menu grid
     col1, col2 = st.columns(2)
@@ -543,16 +459,16 @@ def display_menu():
     col5, col6 = st.columns(2)
     
     menu_options = [
-        ("complete", "📋", "Complete Itinerary", "Full day-by-day travel plan with activities", col1),
-        ("hotels", "🏨", "Hotel Recommendations", "Detailed accommodation options and reviews", col2),
-        ("cost", "💰", "Cost Breakdown", "Detailed budget analysis with price estimates", col3),
-        ("weather", "🌤️", "Weather Information", "Climate details and best travel times", col4),
-        ("alternatives", "🔄", "Alternative Plans", "Different options and backup suggestions", col5)
+        ("complete", "Complete Itinerary", "Full day-by-day travel plan with activities", col1),
+        ("hotels", "Hotel Recommendations", "Detailed accommodation options and reviews", col2),
+        ("cost", "Cost Breakdown", "Detailed budget analysis with price estimates", col3),
+        ("weather", "Weather Information", "Climate details and best travel times", col4),
+        ("alternatives", "Alternative Plans", "Different options and backup suggestions", col5)
     ]
     
-    for option_id, icon, title, description, column in menu_options:
+    for option_id, title, description, column in menu_options:
         with column:
-            if st.button(f"{icon} {title}", key=f"menu_{option_id}", use_container_width=True):
+            if st.button(f"{title}", key=f"menu_{option_id}", use_container_width=True):
                 st.session_state.current_view = option_id
                 st.session_state.loading = True
                 st.rerun()
@@ -565,19 +481,19 @@ def display_currency_converter_compact():
     """Display compact currency converter"""
     st.markdown("""
     <div class="currency-converter">
-        <h4>💱 Currency</h4>
-        <p>Prices shown in your preferred currency</p>
+        <h4 style="font-family: 'Times New Roman', serif; margin-bottom: 1rem;">Currency</h4>
+        <p style="font-family: 'Times New Roman', serif; font-size: 14px;">Prices shown in your preferred currency</p>
     </div>
     """, unsafe_allow_html=True)
     
     currencies = {
-        "USD": "🇺🇸 USD",
-        "INR": "🇮🇳 INR", 
-        "EUR": "🇪🇺 EUR",
-        "GBP": "🇬🇧 GBP",
-        "AUD": "🇦🇺 AUD",
-        "CAD": "🇨🇦 CAD",
-        "JPY": "🇯🇵 JPY"
+        "USD": "USD",
+        "INR": "INR", 
+        "EUR": "EUR",
+        "GBP": "GBP",
+        "AUD": "AUD",
+        "CAD": "CAD",
+        "JPY": "JPY"
     }
     
     selected_currency = st.selectbox(
@@ -592,146 +508,102 @@ def display_currency_converter_compact():
         st.session_state.currency = selected_currency
         st.rerun()
 
-def display_content_page(content_type: str, data: str):
-    """Display specific content page with back button"""
+def display_clean_itinerary(content: str):
+    """Display itinerary in clean format"""
+    lines = content.split('\n')
+    current_section = []
+    sections = []
+    
+    for line in lines:
+        line = line.strip()
+        if not line:
+            if current_section:
+                sections.append('\n'.join(current_section))
+                current_section = []
+            continue
+        current_section.append(line)
+    
+    if current_section:
+        sections.append('\n'.join(current_section))
+    
+    for section in sections:
+        if not section.strip():
+            continue
+            
+        # Check if it's a day section
+        if re.match(r'Day \d+', section, re.IGNORECASE):
+            lines = section.split('\n')
+            day_title = lines[0]
+            day_content = '\n'.join(lines[1:]) if len(lines) > 1 else ""
+            
+            st.markdown(f"""
+            <div class="clean-day-section">
+                <div class="clean-heading">{day_title}</div>
+                <div class="clean-text">{day_content.replace(chr(10), '<br>')}</div>
+            </div>
+            """, unsafe_allow_html=True)
+        else:
+            # Regular content section
+            st.markdown(f"""
+            <div class="clean-content">
+                <div class="clean-text">{section.replace(chr(10), '<br>')}</div>
+            </div>
+            """, unsafe_allow_html=True)
+
+def display_clean_generic_content(content: str):
+    """Display generic content in clean format"""
+    st.markdown(f"""
+    <div class="clean-content">
+        <div class="clean-text">{content.replace(chr(10), '<br>')}</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+def display_clean_content_page(content_type: str, data: str):
+    """Display content in clean Times New Roman format"""
     
     # Back button
     if st.button("← Back to Menu", key="back_button", use_container_width=False):
         st.session_state.current_view = "menu"
         st.rerun()
     
-    # Content mapping
-    content_config = {
-        "complete": {
-            "title": "📋 Complete Travel Itinerary",
-            "icon": "📋",
-            "card_class": "itinerary-card",
-            "description": "Your comprehensive day-by-day travel plan"
-        },
-        "hotels": {
-            "title": "🏨 Hotel Recommendations",
-            "icon": "🏨",
-            "card_class": "hotel-card",
-            "description": "Carefully selected accommodations for your trip"
-        },
-        "cost": {
-            "title": "💰 Detailed Cost Breakdown",
-            "icon": "💰",
-            "card_class": "cost-card",
-            "description": "Complete budget analysis and expense planning"
-        },
-        "weather": {
-            "title": "🌤️ Weather & Climate Information",
-            "icon": "🌤️",
-            "card_class": "weather-card",
-            "description": "Weather patterns and travel climate guidance"
-        },
-        "alternatives": {
-            "title": "🔄 Alternative Travel Plans",
-            "icon": "🔄",
-            "card_class": "alternative-card",
-            "description": "Different options and backup travel suggestions"
-        }
+    # Content titles
+    titles = {
+        "complete": "Complete Travel Itinerary",
+        "hotels": "Hotel Recommendations", 
+        "cost": "Cost Breakdown",
+        "weather": "Weather Information",
+        "alternatives": "Alternative Plans"
     }
     
-    config = content_config.get(content_type, content_config["complete"])
+    title = titles.get(content_type, "Travel Information")
     
-    # Header
+    # Simple header
     st.markdown(f"""
-    <div class="content-card">
-        <div class="content-header">
-            <h1>{config['icon']} {config['title']}</h1>
-            <p style="font-size: 1.1rem; opacity: 0.9; margin-top: 1rem;">
-                {config['description']}
-            </p>
-        </div>
+    <div class="simple-header">
+        <h1>{title}</h1>
     </div>
     """, unsafe_allow_html=True)
     
-    # Process and display content
-    processed_content = extract_price_ranges(data)
+    # Clean and process content
+    clean_data = clean_content_from_markdown(data)
+    processed_content = extract_price_ranges(clean_data)
     
+    # Display content in clean format
     if content_type == "complete":
-        display_formatted_itinerary(processed_content)
-    elif content_type == "cost":
-        display_formatted_cost_breakdown(processed_content)
+        display_clean_itinerary(processed_content)
     else:
-        # Generic content display
-        st.markdown(f"""
-        <div class="{config['card_class']}">
-            <div style="line-height: 1.8; font-size: 1.1rem;">
-                {processed_content.replace(chr(10), '<br><br>')}
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
+        display_clean_generic_content(processed_content)
 
-def display_formatted_itinerary(content: str):
-    """Display formatted itinerary with day sections"""
-    lines = content.split('\n')
-    current_day = None
-    current_content = []
-    
-    for line in lines:
-        line = line.strip()
-        if not line:
-            continue
-            
-        # Check if it's a day header
-        if re.match(r'Day \d+', line, re.IGNORECASE):
-            # Save previous day if exists
-            if current_day and current_content:
-                st.markdown(f"""
-                <div class="itinerary-card">
-                    <div class="day-header">{current_day}</div>
-                    <div class="day-content">
-                        {'<br>'.join(current_content)}
-                    </div>
-                </div>
-                """, unsafe_allow_html=True)
-            
-            current_day = line
-            current_content = []
-        else:
-            if line:
-                current_content.append(line)
-    
-    # Add the last day
-    if current_day and current_content:
-        st.markdown(f"""
-        <div class="itinerary-card">
-            <div class="day-header">{current_day}</div>
-            <div class="day-content">
-                {'<br>'.join(current_content)}
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    # If no day structure found, display as is
-    if not current_day:
-        st.markdown(f"""
-        <div class="itinerary-card">
-            <div style="line-height: 1.8; font-size: 1.1rem;">
-                {content.replace(chr(10), '<br><br>')}
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
-
-def display_formatted_cost_breakdown(content: str):
-    """Display formatted cost breakdown"""
-    st.markdown(f"""
-    <div class="cost-card">
-        <div style="line-height: 1.8; font-size: 1.1rem;">
-            {content.replace(chr(10), '<br><br>')}
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+def display_content_page(content_type: str, data: str):
+    """Display specific content page with back button - CLEAN VERSION"""
+    display_clean_content_page(content_type, data)
 
 def main():
     """Main application function"""
     try:
         # Initialize everything
         initialize_page_config()
-        load_custom_css()
+        load_clean_custom_css()
         init_session_state()
         
         # Handle different views
@@ -740,7 +612,7 @@ def main():
             display_welcome_screen()
             
             # Chat section
-            st.markdown("### 💬 Plan Your Perfect Trip")
+            st.markdown("### Plan Your Perfect Trip")
             st.markdown("---")
             
             # Input section
@@ -756,16 +628,16 @@ def main():
                     )
                 
                 with col2:
-                    send_button = st.button("🚀 Plan Trip", use_container_width=True)
+                    send_button = st.button("Plan Trip", use_container_width=True)
             
             # Example prompts
-            st.markdown("#### 💡 Try these examples:")
+            st.markdown("#### Try these examples:")
             example_col1, example_col2, example_col3 = st.columns(3)
             
             examples = [
-                ("🏖️ Beach vacation in Goa", "Plan a 7-day beach vacation in Goa for 2 people with water sports and local cuisine"),
-                ("🏔️ Adventure in Nepal", "Plan a 10-day adventure trip to Nepal including trekking and cultural sites for 3 people"),
-                ("🏛️ Cultural tour of Rajasthan", "Plan a 5-day cultural heritage tour of Rajasthan covering palaces and forts for a family of 4")
+                ("Beach vacation in Goa", "Plan a 7-day beach vacation in Goa for 2 people with water sports and local cuisine"),
+                ("Adventure in Nepal", "Plan a 10-day adventure trip to Nepal including trekking and cultural sites for 3 people"),
+                ("Cultural tour of Rajasthan", "Plan a 5-day cultural heritage tour of Rajasthan covering palaces and forts for a family of 4")
             ]
             
             for i, (button_text, query) in enumerate(examples):
@@ -774,7 +646,7 @@ def main():
                         st.session_state.user_query = query
                         st.session_state.current_view = "menu"
                         # Get initial travel data
-                        with st.spinner("🧠 Preparing your travel options..."):
+                        with st.spinner("Preparing your travel options..."):
                             response_data = make_api_request(query, "complete")
                             if response_data:
                                 st.session_state.travel_data = response_data.get("answer", "")
@@ -785,7 +657,7 @@ def main():
                 st.session_state.user_query = user_input.strip()
                 st.session_state.current_view = "menu"
                 # Get initial travel data
-                with st.spinner("🧠 Preparing your travel options..."):
+                with st.spinner("Preparing your travel options..."):
                     response_data = make_api_request(user_input.strip(), "complete")
                     if response_data:
                         st.session_state.travel_data = response_data.get("answer", "")
@@ -799,11 +671,11 @@ def main():
             # Handle loading state
             if st.session_state.loading:
                 st.markdown("""
-                <div class="content-card">
+                <div class="clean-content">
                     <div style="text-align: center; padding: 3rem;">
                         <div class="loading-spinner"></div>
-                        <h3 style="margin-top: 1rem;">🧠 AI is preparing your detailed information...</h3>
-                        <p>This may take a few moments</p>
+                        <h3 style="margin-top: 1rem; font-family: 'Times New Roman', serif;">AI is preparing your detailed information...</h3>
+                        <p style="font-family: 'Times New Roman', serif;">This may take a few moments</p>
                     </div>
                 </div>
                 """, unsafe_allow_html=True)
@@ -816,7 +688,7 @@ def main():
                     # Display the specific content
                     display_content_page(st.session_state.current_view, response_data.get("answer"))
                 else:
-                    st.error("❌ Failed to generate the requested information. Please try again.")
+                    st.error("Failed to generate the requested information. Please try again.")
                     if st.button("← Back to Menu"):
                         st.session_state.current_view = "menu"
                         st.rerun()
@@ -828,19 +700,18 @@ def main():
         # Footer
         st.markdown("---")
         st.markdown(
-            "<div style='text-align: center; opacity: 0.7; font-size: 0.9rem; padding: 1rem;'>"
-            "Built with ❤️ using Streamlit & AI • "
-            "<span style='opacity: 0.5;'>Navigate through different sections to explore your travel plan</span>"
+            "<div style='text-align: center; color: #6c757d; font-size: 14px; padding: 1rem; font-family: Times New Roman, serif;'>"
+            "Built with Streamlit & AI • Navigate through different sections to explore your travel plan"
             "</div>",
             unsafe_allow_html=True,
         )
         
     except Exception as e:
         logger.critical(f"Main app crash: {e}")
-        st.error("🚨 Critical error: The application crashed.")
+        st.error("Critical error: The application crashed.")
         
         # Reset button in case of crash
-        if st.button("🔄 Reset Application"):
+        if st.button("Reset Application"):
             # Clear session state
             for key in list(st.session_state.keys()):
                 del st.session_state[key]
@@ -849,4 +720,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
     
