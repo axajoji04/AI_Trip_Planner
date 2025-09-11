@@ -16,18 +16,18 @@ logger = logging.getLogger(__name__)
 try:
     BASE_URL = os.getenv("BACKEND_URL", "http://localhost:8000")
     EXCHANGE_API_URL = os.getenv("EXCHANGE_API_URL", "https://api.exchangerate-api.com/v4/latest/USD")
-    TIMEOUT = int(os.getenv("TIMEOUT", "30"))
+    TIMEOUT = int(os.getenv("TIMEOUT", "60"))  # Increased timeout for API calls
 except Exception as e:
     logger.error(f"Configuration error: {e}")
     BASE_URL = "http://localhost:8000"
     EXCHANGE_API_URL = "https://api.exchangerate-api.com/v4/latest/USD"
-    TIMEOUT = 30
+    TIMEOUT = 60
 
 def initialize_page_config():
     """Initialize page config safely"""
     try:
         st.set_page_config(
-            page_title="AI Travel Companion",
+            page_title="🌍 AI Travel Companion",
             page_icon="✈️",
             layout="wide",
             initial_sidebar_state="collapsed",
@@ -60,20 +60,20 @@ def load_clean_custom_css():
         
         .clean-heading {
             font-family: 'Times New Roman', serif;
-            font-size: 16px;
+            font-size: 18px;
             font-weight: bold;
             color: #2c3e50;
-            margin: 20px 0 10px 0;
-            padding-bottom: 5px;
-            border-bottom: 1px solid #eee;
+            margin: 20px 0 15px 0;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #007bff;
         }
         
         .clean-subheading {
             font-family: 'Times New Roman', serif;
-            font-size: 15px;
+            font-size: 16px;
             font-weight: 600;
             color: #34495e;
-            margin: 15px 0 8px 0;
+            margin: 15px 0 10px 0;
         }
         
         .clean-text {
@@ -81,7 +81,7 @@ def load_clean_custom_css():
             font-size: 14px;
             line-height: 1.7;
             color: #2c3e50;
-            margin: 8px 0;
+            margin: 10px 0;
         }
         
         .clean-day-section {
@@ -90,6 +90,47 @@ def load_clean_custom_css():
             padding: 1.5rem;
             margin: 1rem 0;
             border-radius: 5px;
+        }
+        
+        .weather-section {
+            background: linear-gradient(135deg, #74b9ff, #0984e3);
+            color: white;
+            border-radius: 10px;
+            padding: 2rem;
+            margin: 1rem 0;
+        }
+        
+        .hotel-section {
+            background: linear-gradient(135deg, #fd79a8, #e84393);
+            color: white;
+            border-radius: 10px;
+            padding: 2rem;
+            margin: 1rem 0;
+        }
+        
+        .cost-section {
+            background: linear-gradient(135deg, #55a3ff, #003d82);
+            color: white;
+            border-radius: 10px;
+            padding: 2rem;
+            margin: 1rem 0;
+        }
+        
+        .alternative-section {
+            background: linear-gradient(135deg, #00b894, #00a085);
+            color: white;
+            border-radius: 10px;
+            padding: 2rem;
+            margin: 1rem 0;
+        }
+        
+        .error-section {
+            background: linear-gradient(135deg, #e17055, #d63031);
+            color: white;
+            border-radius: 10px;
+            padding: 2rem;
+            margin: 1rem 0;
+            text-align: center;
         }
         
         .clean-button {
@@ -112,16 +153,15 @@ def load_clean_custom_css():
         .simple-header {
             text-align: center;
             padding: 1.5rem;
-            background: #f8f9fa;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
             border-radius: 10px;
             margin-bottom: 2rem;
-            border: 1px solid #dee2e6;
         }
         
         .simple-header h1 {
             font-family: 'Times New Roman', serif;
-            font-size: 20px;
-            color: #2c3e50;
+            font-size: 22px;
             margin: 0;
             font-weight: 600;
         }
@@ -132,33 +172,32 @@ def load_clean_custom_css():
             font-size: 14px;
             line-height: 1.6;
             color: #2c3e50;
-            margin: 5px 0;
+            margin: 8px 0;
             padding-left: 20px;
             position: relative;
         }
         
         .clean-list-item::before {
-            content: "•";
+            content: "🔸";
             position: absolute;
             left: 0;
-            color: #007bff;
         }
         
         /* Price highlighting */
         .price-highlight {
             background: #fff3cd;
-            padding: 2px 4px;
-            border-radius: 3px;
+            padding: 3px 6px;
+            border-radius: 4px;
             font-weight: 600;
         }
 
         /* Main container styling - simplified */
         .main-container {
-            background: #f8f9fa;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
             border-radius: 10px;
             padding: 2rem;
             margin: 1rem 0;
-            border: 1px solid #dee2e6;
         }
         
         /* Menu button styling - clean */
@@ -166,35 +205,37 @@ def load_clean_custom_css():
             background-color: #6c757d;
             color: white;
             border: none;
-            border-radius: 5px;
-            padding: 0.7rem 1.5rem;
+            border-radius: 8px;
+            padding: 1rem 1.5rem;
             font-family: 'Times New Roman', serif;
             font-weight: normal;
-            transition: background-color 0.3s ease;
+            transition: all 0.3s ease;
             width: 100%;
+            font-size: 15px;
         }
         
         .stButton > button:hover {
             background-color: #5a6268;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
         }
         
         /* Currency converter - clean */
         .currency-converter {
-            background: #e9ecef;
+            background: linear-gradient(135deg, #fdcb6e, #e17055);
+            color: white;
             border-radius: 10px;
             padding: 1.5rem;
             margin: 1rem 0;
-            color: #2c3e50;
             text-align: center;
-            border: 1px solid #dee2e6;
         }
         
         /* Loading spinner - clean */
         .loading-spinner {
             display: inline-block;
-            width: 30px;
-            height: 30px;
-            border: 3px solid #dee2e6;
+            width: 40px;
+            height: 40px;
+            border: 4px solid #dee2e6;
             border-radius: 50%;
             border-top-color: #007bff;
             animation: spin 1s ease-in-out infinite;
@@ -202,6 +243,24 @@ def load_clean_custom_css():
         
         @keyframes spin {
             to { transform: rotate(360deg); }
+        }
+        
+        /* Retry button styling */
+        .retry-button {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 1rem 2rem;
+            font-family: 'Times New Roman', serif;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .retry-button:hover {
+            background-color: #c0392b;
+            transform: translateY(-2px);
         }
     </style>
     """
@@ -217,7 +276,7 @@ def init_session_state():
         if "current_view" not in st.session_state:
             st.session_state.current_view = "main"
         if "travel_data" not in st.session_state:
-            st.session_state.travel_data = None
+            st.session_state.travel_data = {}
         if "user_query" not in st.session_state:
             st.session_state.user_query = ""
         if "currency" not in st.session_state:
@@ -226,6 +285,8 @@ def init_session_state():
             st.session_state.exchange_rates = {}
         if "loading" not in st.session_state:
             st.session_state.loading = False
+        if "retry_count" not in st.session_state:
+            st.session_state.retry_count = 0
     except Exception as e:
         logger.error(f"Session state initialization error: {e}")
 
@@ -319,69 +380,81 @@ def extract_price_ranges(text):
         logger.error(f"Price range extraction error: {e}")
         return text
 
-def make_api_request(user_input: str, request_type: str = "complete") -> Optional[Dict[Any, Any]]:
-    """Make API request with comprehensive error handling"""
-    try:
-        logger.info(f"Making request to {BASE_URL}/query")
-        
-        # Modify the query based on request type
-        modified_query = user_input
-        if request_type == "hotels":
-            modified_query = f"Recommend detailed hotels and accommodations for: {user_input}"
-        elif request_type == "cost":
-            modified_query = f"Provide detailed cost breakdown and budget analysis for: {user_input}"
-        elif request_type == "weather":
-            modified_query = f"Provide weather information and climate details for: {user_input}"
-        elif request_type == "alternatives":
-            modified_query = f"Suggest alternative travel plans and options for: {user_input}"
-        
-        payload = {"question": modified_query}
-        headers = {"Content-Type": "application/json"}
-        
-        response = requests.post(
-            f"{BASE_URL}/query", 
-            json=payload,
-            timeout=TIMEOUT,
-            headers=headers
-        )
-        
-        logger.info(f"Response status: {response.status_code}")
-        
-        if response.status_code == 200:
-            return response.json()
-        else:
-            error_msg = f"Server returned status {response.status_code}"
-            if response.text:
-                error_msg += f": {response.text[:200]}"
-            st.error(f"Server Error: {error_msg}")
-            return None
+def make_api_request(user_input: str, request_type: str = "complete", retries: int = 3) -> Optional[Dict[Any, Any]]:
+    """Make API request with comprehensive error handling and retries"""
+    for attempt in range(retries):
+        try:
+            logger.info(f"Making request to {BASE_URL}/query (attempt {attempt + 1}/{retries})")
             
-    except requests.exceptions.ConnectionError as e:
-        logger.error(f"Connection error: {e}")
-        st.error("Connection Error: Unable to connect to the travel planning service.")
-        if "localhost" in BASE_URL:
-            st.info("Tip: Make sure your backend server is running locally, or update the BACKEND_URL environment variable.")
-        return None
-        
-    except requests.exceptions.Timeout as e:
-        logger.error(f"Timeout error: {e}")
-        st.error(f"Timeout Error: Request took longer than {TIMEOUT} seconds. Please try again.")
-        return None
-        
-    except requests.exceptions.RequestException as e:
-        logger.error(f"Request error: {e}")
-        st.error(f"Network Error: {str(e)[:200]}")
-        return None
-        
-    except json.JSONDecodeError as e:
-        logger.error(f"JSON decode error: {e}")
-        st.error("Response Error: Invalid response format from server.")
-        return None
-        
-    except Exception as e:
-        logger.error(f"Unexpected error: {e}")
-        st.error(f"Unexpected Error: {str(e)[:200]}")
-        return None
+            # Modify the query based on request type
+            modified_query = user_input
+            if request_type == "hotels":
+                modified_query = f"🏨 Provide detailed hotel and accommodation recommendations for: {user_input}. Include names, ratings, amenities, and pricing."
+            elif request_type == "cost":
+                modified_query = f"💰 Provide comprehensive cost breakdown and budget analysis for: {user_input}. Include all expenses with detailed pricing."
+            elif request_type == "weather":
+                modified_query = f"🌤️ Provide detailed weather information, climate details, and best travel times for: {user_input}. Include seasonal variations and weather recommendations."
+            elif request_type == "alternatives":
+                modified_query = f"🔄 Suggest comprehensive alternative travel plans, options, and backup suggestions for: {user_input}. Include different destinations, activities, and trip variations."
+            
+            payload = {"question": modified_query}
+            headers = {"Content-Type": "application/json"}
+            
+            response = requests.post(
+                f"{BASE_URL}/query", 
+                json=payload,
+                timeout=TIMEOUT,
+                headers=headers
+            )
+            
+            logger.info(f"Response status: {response.status_code}")
+            
+            if response.status_code == 200:
+                return response.json()
+            elif response.status_code == 429:
+                # Rate limit error - wait before retry
+                wait_time = (attempt + 1) * 10  # Exponential backoff
+                logger.warning(f"Rate limit hit, waiting {wait_time} seconds...")
+                if attempt < retries - 1:  # Don't wait on last attempt
+                    time.sleep(wait_time)
+                    continue
+                else:
+                    return {"error": "rate_limit", "message": "Rate limit exceeded. Please try again in a few minutes."}
+            elif response.status_code == 500:
+                # Server error - try again after a short wait
+                if attempt < retries - 1:
+                    time.sleep(5)
+                    continue
+                else:
+                    return {"error": "server_error", "message": "Server is experiencing issues. Please try again later."}
+            else:
+                error_msg = f"Server returned status {response.status_code}"
+                if response.text:
+                    error_msg += f": {response.text[:200]}"
+                return {"error": "http_error", "message": error_msg}
+                
+        except requests.exceptions.ConnectionError as e:
+            logger.error(f"Connection error: {e}")
+            if attempt < retries - 1:
+                time.sleep(5)
+                continue
+            return {"error": "connection", "message": "Unable to connect to the travel planning service."}
+            
+        except requests.exceptions.Timeout as e:
+            logger.error(f"Timeout error: {e}")
+            if attempt < retries - 1:
+                time.sleep(5)
+                continue
+            return {"error": "timeout", "message": f"Request took longer than {TIMEOUT} seconds."}
+            
+        except Exception as e:
+            logger.error(f"Unexpected error: {e}")
+            if attempt < retries - 1:
+                time.sleep(5)
+                continue
+            return {"error": "unexpected", "message": str(e)[:200]}
+    
+    return None
 
 def clean_content_from_markdown(content: str) -> str:
     """Remove markdown formatting and clean up content"""
@@ -412,9 +485,10 @@ def display_welcome_screen():
     try:
         st.markdown("""
         <div class="main-container">
-            <div style="text-align: center; color: #2c3e50; margin-bottom: 2rem;">
+            <div style="text-align: center; margin-bottom: 2rem;">
+                <div style="font-size: 3rem; margin-bottom: 0.5rem;">🌍✈️</div>
                 <div style="font-size: 2.5rem; font-weight: 600; margin-bottom: 0.5rem; font-family: 'Times New Roman', serif;">AI Travel Companion</div>
-                <div style="font-size: 1.1rem; color: #6c757d; font-family: 'Times New Roman', serif;">Your intelligent travel planning assistant</div>
+                <div style="font-size: 1.2rem; font-family: 'Times New Roman', serif;">Your intelligent travel planning assistant 🤖</div>
             </div>
         </div>
         """, unsafe_allow_html=True)
@@ -423,15 +497,15 @@ def display_welcome_screen():
         col1, col2, col3 = st.columns(3)
         
         features = [
-            ("Interactive Menus", "Choose specific aspects of your trip to explore in detail"),
-            ("Currency Conversion", "Automatic price conversion to your preferred currency"),
-            ("Clean Presentation", "Professional, easy-to-read format for all travel information")
+            ("🎯 Interactive Menus", "Choose specific aspects of your trip to explore in detail"),
+            ("💱 Currency Conversion", "Automatic price conversion to your preferred currency"),
+            ("📋 Clean Presentation", "Professional, easy-to-read format for all travel information")
         ]
         
         for i, (title, description) in enumerate(features):
             with [col1, col2, col3][i]:
                 st.markdown(f"""
-                <div style="background: #f8f9fa; border-radius: 10px; padding: 1.5rem; margin: 1rem; text-align: center; color: #2c3e50; border: 1px solid #dee2e6;">
+                <div style="background: white; color: #2c3e50; border-radius: 10px; padding: 1.5rem; margin: 1rem; text-align: center; border: 1px solid #dee2e6; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
                     <h4 style="font-family: 'Times New Roman', serif; margin-bottom: 1rem;">{title}</h4>
                     <p style="font-family: 'Times New Roman', serif; font-size: 14px;">{description}</p>
                 </div>
@@ -439,16 +513,16 @@ def display_welcome_screen():
                 
     except Exception as e:
         logger.error(f"Welcome screen error: {e}")
-        st.title("AI Travel Companion")
-        st.write("Your intelligent travel planning assistant")
+        st.title("🌍 AI Travel Companion")
+        st.write("Your intelligent travel planning assistant 🤖")
 
 def display_menu():
     """Display the interactive menu after getting travel data"""
     st.markdown(f"""
     <div class="simple-header">
-        <h1>Choose What You'd Like to Explore</h1>
-        <p style="font-size: 14px; margin-top: 1rem; font-family: 'Times New Roman', serif;">
-            Your travel query: <strong>"{st.session_state.user_query}"</strong>
+        <h1>🎯 Choose What You'd Like to Explore</h1>
+        <p style="font-size: 15px; margin-top: 1rem; font-family: 'Times New Roman', serif;">
+            Your travel query: <strong>"{st.session_state.user_query}"</strong> ✨
         </p>
     </div>
     """, unsafe_allow_html=True)
@@ -459,11 +533,11 @@ def display_menu():
     col5, col6 = st.columns(2)
     
     menu_options = [
-        ("complete", "Complete Itinerary", "Full day-by-day travel plan with activities", col1),
-        ("hotels", "Hotel Recommendations", "Detailed accommodation options and reviews", col2),
-        ("cost", "Cost Breakdown", "Detailed budget analysis with price estimates", col3),
-        ("weather", "Weather Information", "Climate details and best travel times", col4),
-        ("alternatives", "Alternative Plans", "Different options and backup suggestions", col5)
+        ("complete", "📅 Complete Itinerary", "Full day-by-day travel plan with activities", col1),
+        ("hotels", "🏨 Hotel Recommendations", "Detailed accommodation options and reviews", col2),
+        ("cost", "💰 Cost Breakdown", "Detailed budget analysis with price estimates", col3),
+        ("weather", "🌤️ Weather Information", "Climate details and best travel times", col4),
+        ("alternatives", "🔄 Alternative Plans", "Different options and backup suggestions", col5)
     ]
     
     for option_id, title, description, column in menu_options:
@@ -471,6 +545,7 @@ def display_menu():
             if st.button(f"{title}", key=f"menu_{option_id}", use_container_width=True):
                 st.session_state.current_view = option_id
                 st.session_state.loading = True
+                st.session_state.retry_count = 0
                 st.rerun()
     
     # Currency converter in the last column
@@ -481,19 +556,19 @@ def display_currency_converter_compact():
     """Display compact currency converter"""
     st.markdown("""
     <div class="currency-converter">
-        <h4 style="font-family: 'Times New Roman', serif; margin-bottom: 1rem;">Currency</h4>
+        <h4 style="font-family: 'Times New Roman', serif; margin-bottom: 1rem;">💱 Currency</h4>
         <p style="font-family: 'Times New Roman', serif; font-size: 14px;">Prices shown in your preferred currency</p>
     </div>
     """, unsafe_allow_html=True)
     
     currencies = {
-        "USD": "USD",
-        "INR": "INR", 
-        "EUR": "EUR",
-        "GBP": "GBP",
-        "AUD": "AUD",
-        "CAD": "CAD",
-        "JPY": "JPY"
+        "USD": "🇺🇸 USD",
+        "INR": "🇮🇳 INR", 
+        "EUR": "🇪🇺 EUR",
+        "GBP": "🇬🇧 GBP",
+        "AUD": "🇦🇺 AUD",
+        "CAD": "🇨🇦 CAD",
+        "JPY": "🇯🇵 JPY"
     }
     
     selected_currency = st.selectbox(
@@ -508,95 +583,70 @@ def display_currency_converter_compact():
         st.session_state.currency = selected_currency
         st.rerun()
 
-def display_clean_itinerary(content: str):
-    """Display itinerary in clean format"""
-    lines = content.split('\n')
-    current_section = []
-    sections = []
-    
-    for line in lines:
-        line = line.strip()
-        if not line:
-            if current_section:
-                sections.append('\n'.join(current_section))
-                current_section = []
-            continue
-        current_section.append(line)
-    
-    if current_section:
-        sections.append('\n'.join(current_section))
-    
-    for section in sections:
-        if not section.strip():
-            continue
-            
-        # Check if it's a day section
-        if re.match(r'Day \d+', section, re.IGNORECASE):
-            lines = section.split('\n')
-            day_title = lines[0]
-            day_content = '\n'.join(lines[1:]) if len(lines) > 1 else ""
-            
-            st.markdown(f"""
-            <div class="clean-day-section">
-                <div class="clean-heading">{day_title}</div>
-                <div class="clean-text">{day_content.replace(chr(10), '<br>')}</div>
-            </div>
-            """, unsafe_allow_html=True)
-        else:
-            # Regular content section
-            st.markdown(f"""
-            <div class="clean-content">
-                <div class="clean-text">{section.replace(chr(10), '<br>')}</div>
-            </div>
-            """, unsafe_allow_html=True)
-
-def display_clean_generic_content(content: str):
-    """Display generic content in clean format"""
-    st.markdown(f"""
-    <div class="clean-content">
-        <div class="clean-text">{content.replace(chr(10), '<br>')}</div>
-    </div>
-    """, unsafe_allow_html=True)
-
-def display_clean_content_page(content_type: str, data: str):
-    """Display content in clean Times New Roman format"""
-    
-    # Back button
-    if st.button("← Back to Menu", key="back_button", use_container_width=False):
-        st.session_state.current_view = "menu"
-        st.rerun()
-    
-    # Content titles
-    titles = {
-        "complete": "Complete Travel Itinerary",
-        "hotels": "Hotel Recommendations", 
-        "cost": "Cost Breakdown",
-        "weather": "Weather Information",
-        "alternatives": "Alternative Plans"
+def display_error_with_retry(error_type: str, error_message: str, content_type: str):
+    """Display error message with retry option"""
+    error_emojis = {
+        "rate_limit": "⏳",
+        "server_error": "🔧",
+        "connection": "🌐",
+        "timeout": "⏰",
+        "unexpected": "❌"
     }
     
-    title = titles.get(content_type, "Travel Information")
+    emoji = error_emojis.get(error_type, "❌")
     
-    # Simple header
     st.markdown(f"""
-    <div class="simple-header">
-        <h1>{title}</h1>
+    <div class="error-section">
+        <h2>{emoji} Oops! Something went wrong</h2>
+        <p style="font-size: 16px; margin: 1rem 0;">{error_message}</p>
+        <p style="font-size: 14px;">Don't worry, you can try again! 🔄</p>
     </div>
     """, unsafe_allow_html=True)
     
+    col1, col2, col3 = st.columns([1, 1, 1])
+    
+    with col2:
+        if st.button("🔄 Try Again", key=f"retry_{content_type}", use_container_width=True):
+            st.session_state.loading = True
+            st.session_state.retry_count += 1
+            st.rerun()
+    
+    # Back button
+    if st.button("← Back to Menu", key=f"back_error_{content_type}"):
+        st.session_state.current_view = "menu"
+        st.session_state.retry_count = 0
+        st.rerun()
+
+def display_content_only(content_type: str, content: str):
+    """Display ONLY the requested content without any extra elements"""
+    
+    # Content type styling and emojis
+    section_styles = {
+        "weather": ("weather-section", "🌤️"),
+        "hotels": ("hotel-section", "🏨"),
+        "cost": ("cost-section", "💰"),
+        "alternatives": ("alternative-section", "🔄"),
+        "complete": ("clean-content", "📅")
+    }
+    
+    section_class, emoji = section_styles.get(content_type, ("clean-content", "📋"))
+    
     # Clean and process content
-    clean_data = clean_content_from_markdown(data)
+    clean_data = clean_content_from_markdown(content)
     processed_content = extract_price_ranges(clean_data)
     
-    # Display content in clean format
-    if content_type == "complete":
-        display_clean_itinerary(processed_content)
-    else:
-        display_clean_generic_content(processed_content)
-
-def display_content_page(content_type: str, data: str):
-    """Display specific content page with back button - CLEAN VERSION"""
-    display_clean_content_page(content_type, data)
+    # Display ONLY the content
+    st.markdown(f"""
+    <div class="{section_class}">
+        <div class="clean-text">{processed_content.replace(chr(10), '<br>')}</div>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Back button at the bottom
+    st.markdown("<br>", unsafe_allow_html=True)
+    if st.button("← Back to Menu", key=f"back_{content_type}", use_container_width=False):
+        st.session_state.current_view = "menu"
+        st.rerun()
 
 def main():
     """Main application function"""
@@ -612,7 +662,7 @@ def main():
             display_welcome_screen()
             
             # Chat section
-            st.markdown("### Plan Your Perfect Trip")
+            st.markdown("### 🗺️ Plan Your Perfect Trip")
             st.markdown("---")
             
             # Input section
@@ -622,22 +672,22 @@ def main():
                 with col1:
                     user_input = st.text_input(
                         "",
-                        placeholder="Where would you like to travel? e.g., 'Plan a 5-day romantic trip to Paris for 2 people'",
+                        placeholder="Where would you like to travel? e.g., 'Plan a 5-day romantic trip to Paris for 2 people' 💕",
                         key="travel_input",
                         label_visibility="collapsed"
                     )
                 
                 with col2:
-                    send_button = st.button("Plan Trip", use_container_width=True)
+                    send_button = st.button("🚀 Plan Trip", use_container_width=True)
             
             # Example prompts
-            st.markdown("#### Try these examples:")
+            st.markdown("#### ✨ Try these examples:")
             example_col1, example_col2, example_col3 = st.columns(3)
             
             examples = [
-                ("Beach vacation in Goa", "Plan a 7-day beach vacation in Goa for 2 people with water sports and local cuisine"),
-                ("Adventure in Nepal", "Plan a 10-day adventure trip to Nepal including trekking and cultural sites for 3 people"),
-                ("Cultural tour of Rajasthan", "Plan a 5-day cultural heritage tour of Rajasthan covering palaces and forts for a family of 4")
+                ("🏖️ Beach vacation in Goa", "Plan a 7-day beach vacation in Goa for 2 people with water sports and local cuisine"),
+                ("🏔️ Adventure in Nepal", "Plan a 10-day adventure trip to Nepal including trekking and cultural sites for 3 people"),
+                ("🏰 Cultural tour of Rajasthan", "Plan a 5-day cultural heritage tour of Rajasthan covering palaces and forts for a family of 4")
             ]
             
             for i, (button_text, query) in enumerate(examples):
@@ -646,10 +696,10 @@ def main():
                         st.session_state.user_query = query
                         st.session_state.current_view = "menu"
                         # Get initial travel data
-                        with st.spinner("Preparing your travel options..."):
+                        with st.spinner("🔄 Preparing your travel options..."):
                             response_data = make_api_request(query, "complete")
-                            if response_data:
-                                st.session_state.travel_data = response_data.get("answer", "")
+                            if response_data and not response_data.get("error"):
+                                st.session_state.travel_data["complete"] = response_data.get("answer", "")
                         st.rerun()
             
             # Process user input
@@ -657,10 +707,10 @@ def main():
                 st.session_state.user_query = user_input.strip()
                 st.session_state.current_view = "menu"
                 # Get initial travel data
-                with st.spinner("Preparing your travel options..."):
+                with st.spinner("🔄 Preparing your travel options..."):
                     response_data = make_api_request(user_input.strip(), "complete")
-                    if response_data:
-                        st.session_state.travel_data = response_data.get("answer", "")
+                    if response_data and not response_data.get("error"):
+                        st.session_state.travel_data["complete"] = response_data.get("answer", "")
                 st.rerun()
         
         elif st.session_state.current_view == "menu":
@@ -670,12 +720,20 @@ def main():
         elif st.session_state.current_view in ["complete", "hotels", "cost", "weather", "alternatives"]:
             # Handle loading state
             if st.session_state.loading:
-                st.markdown("""
+                loading_messages = {
+                    "weather": "🌤️ Gathering weather information...",
+                    "hotels": "🏨 Finding the best accommodations...",
+                    "cost": "💰 Calculating detailed costs...",
+                    "alternatives": "🔄 Exploring alternative options...",
+                    "complete": "📅 Creating your complete itinerary..."
+                }
+                
+                st.markdown(f"""
                 <div class="clean-content">
                     <div style="text-align: center; padding: 3rem;">
                         <div class="loading-spinner"></div>
-                        <h3 style="margin-top: 1rem; font-family: 'Times New Roman', serif;">AI is preparing your detailed information...</h3>
-                        <p style="font-family: 'Times New Roman', serif;">This may take a few moments</p>
+                        <h3 style="margin-top: 1rem; font-family: 'Times New Roman', serif;">{loading_messages.get(st.session_state.current_view, "🤖 AI is working on your request...")}</h3>
+                        <p style="font-family: 'Times New Roman', serif;">This may take a few moments ⏳</p>
                     </div>
                 </div>
                 """, unsafe_allow_html=True)
@@ -684,34 +742,57 @@ def main():
                 response_data = make_api_request(st.session_state.user_query, st.session_state.current_view)
                 st.session_state.loading = False
                 
-                if response_data and response_data.get("answer"):
-                    # Display the specific content
-                    display_content_page(st.session_state.current_view, response_data.get("answer"))
+                if response_data and not response_data.get("error"):
+                    # Store the data and display only the content
+                    st.session_state.travel_data[st.session_state.current_view] = response_data.get("answer", "")
+                    display_content_only(st.session_state.current_view, response_data.get("answer", ""))
+                elif response_data and response_data.get("error"):
+                    # Display error with retry option
+                    display_error_with_retry(
+                        response_data.get("error", "unknown"),
+                        response_data.get("message", "An unknown error occurred"),
+                        st.session_state.current_view
+                    )
                 else:
-                    st.error("Failed to generate the requested information. Please try again.")
-                    if st.button("← Back to Menu"):
-                        st.session_state.current_view = "menu"
-                        st.rerun()
+                    # Generic error
+                    display_error_with_retry(
+                        "unexpected",
+                        "Failed to generate the requested information",
+                        st.session_state.current_view
+                    )
             else:
-                # This shouldn't happen, but just in case
-                st.session_state.current_view = "menu"
-                st.rerun()
+                # Display cached data if available
+                if st.session_state.current_view in st.session_state.travel_data:
+                    display_content_only(
+                        st.session_state.current_view, 
+                        st.session_state.travel_data[st.session_state.current_view]
+                    )
+                else:
+                    # This shouldn't happen, but redirect to menu
+                    st.session_state.current_view = "menu"
+                    st.rerun()
         
         # Footer
         st.markdown("---")
         st.markdown(
             "<div style='text-align: center; color: #6c757d; font-size: 14px; padding: 1rem; font-family: Times New Roman, serif;'>"
-            "Built with Streamlit & AI • Navigate through different sections to explore your travel plan"
+            "🚀 Built with Streamlit & AI • ✨ Navigate through different sections to explore your travel plan • 🌍 Happy Traveling!"
             "</div>",
             unsafe_allow_html=True,
         )
         
     except Exception as e:
         logger.critical(f"Main app crash: {e}")
-        st.error("Critical error: The application crashed.")
+        st.markdown("""
+        <div class="error-section">
+            <h2>💥 Critical Error</h2>
+            <p>The application encountered an unexpected error and needs to restart.</p>
+            <p>Don't worry, your data is safe! 🔒</p>
+        </div>
+        """, unsafe_allow_html=True)
         
         # Reset button in case of crash
-        if st.button("Reset Application"):
+        if st.button("🔄 Reset Application"):
             # Clear session state
             for key in list(st.session_state.keys()):
                 del st.session_state[key]
