@@ -382,35 +382,36 @@ def load_stunning_custom_css():
 def init_session_state():
     """Initialize session state variables safely"""
     try:
-        if "current_view" not in st.session_state:
-            st.session_state.current_view = "main"
-        if "travel_data" not in st.session_state:
-            st.session_state.travel_data = None
-        if "user_query" not in st.session_state:
-            st.session_state.user_query = ""
-        if "currency" not in st.session_state:
-            st.session_state.currency = "USD"
-        if "exchange_rates" not in st.session_state:
-            st.session_state.exchange_rates = {}
-        if "loading" not in st.session_state:
-            st.session_state.loading = False
+        defaults = {
+            "current_view": "main",
+            "travel_data": None,
+            "user_query": "",
+            "currency": "USD",
+            "exchange_rates": {},
+            "loading": False
+        }
+        
+        for key, default_value in defaults.items():
+            if key not in st.session_state:
+                st.session_state[key] = default_value
+                
     except Exception as e:
         logger.error(f"Session state initialization error: {e}")
 
 def get_exchange_rates():
-    """Fetch current exchange rates"""
+    """Fetch current exchange rates with better error handling"""
     try:
         if not st.session_state.exchange_rates:
             response = requests.get(EXCHANGE_API_URL, timeout=10)
-            if response.status_code == 200:
-                data = response.json()
-                st.session_state.exchange_rates = data.get("rates", {})
-                st.session_state.exchange_rates["USD"] = 1.0  # Base currency
+            response.raise_for_status()  # Raises exception for bad status codes
+            data = response.json()
+            st.session_state.exchange_rates = data.get("rates", {})
+            st.session_state.exchange_rates["USD"] = 1.0  # Base currency
         return st.session_state.exchange_rates
-    except Exception as e:
+    except (requests.RequestException, ValueError, KeyError) as e:
         logger.error(f"Exchange rate fetch error: {e}")
         # Fallback rates
-        return {
+        fallback_rates = {
             "USD": 1.0,
             "INR": 83.0,
             "EUR": 0.85,
@@ -419,10 +420,15 @@ def get_exchange_rates():
             "CAD": 1.25,
             "JPY": 110.0
         }
+        st.session_state.exchange_rates = fallback_rates
+        return fallback_rates
 
 def convert_price(amount_str, target_currency="INR"):
-    """Convert price from USD to target currency"""
+    """Convert price from USD to target currency with better error handling"""
     try:
+        if not amount_str:
+            return amount_str
+            
         # Extract numeric value from price string
         price_match = re.search(r'[\d,]+(?:\.\d+)?', str(amount_str))
         if not price_match:
@@ -450,13 +456,16 @@ def convert_price(amount_str, target_currency="INR"):
             return f"{symbol}{converted:,.2f}"
         
         return amount_str
-    except Exception as e:
+    except (ValueError, TypeError, KeyError) as e:
         logger.error(f"Price conversion error: {e}")
         return amount_str
 
 def extract_price_ranges(text):
     """Extract and convert price ranges from text with beautiful highlighting"""
     try:
+        if not text:
+            return text
+            
         currency = st.session_state.currency
         if currency == "USD":
             # Still highlight prices even in USD
@@ -494,6 +503,10 @@ def extract_price_ranges(text):
 def make_api_request(user_input: str, request_type: str = "complete") -> Optional[Dict[Any, Any]]:
     """Make API request with comprehensive error handling"""
     try:
+        if not user_input or not user_input.strip():
+            logger.warning("Empty user input provided")
+            return None
+            
         logger.info(f"Making request to {BASE_URL}/query")
         
         # Modify the query based on request type
@@ -518,15 +531,9 @@ def make_api_request(user_input: str, request_type: str = "complete") -> Optiona
         )
         
         logger.info(f"Response status: {response.status_code}")
+        response.raise_for_status()  # Raises exception for bad status codes
         
-        if response.status_code == 200:
-            return response.json()
-        else:
-            error_msg = f"Server returned status {response.status_code}"
-            if response.text:
-                error_msg += f": {response.text[:200]}"
-            st.error(f"Server Error: {error_msg}")
-            return None
+        return response.json()
             
     except requests.exceptions.ConnectionError as e:
         logger.error(f"Connection error: {e}")
@@ -540,12 +547,20 @@ def make_api_request(user_input: str, request_type: str = "complete") -> Optiona
         st.error(f"Timeout Error: Request took longer than {TIMEOUT} seconds. Please try again.")
         return None
         
+    except requests.exceptions.HTTPError as e:
+        logger.error(f"HTTP error: {e}")
+        error_msg = f"Server returned status {response.status_code}"
+        if hasattr(e, 'response') and e.response.text:
+            error_msg += f": {e.response.text[:200]}"
+        st.error(f"Server Error: {error_msg}")
+        return None
+        
     except requests.exceptions.RequestException as e:
         logger.error(f"Request error: {e}")
         st.error(f"Network Error: {str(e)[:200]}")
         return None
         
-    except json.JSONDecodeError as e:
+    except (json.JSONDecodeError, ValueError) as e:
         logger.error(f"JSON decode error: {e}")
         st.error("Response Error: Invalid response format from server.")
         return None
@@ -557,27 +572,35 @@ def make_api_request(user_input: str, request_type: str = "complete") -> Optiona
 
 def clean_content_from_markdown(content: str) -> str:
     """Remove markdown formatting and clean up content"""
-    # Remove markdown headers (# ## ### ####)
-    content = re.sub(r'^#{1,6}\s*', '', content, flags=re.MULTILINE)
-    
-    # Remove markdown bold (**text** or __text__)
-    content = re.sub(r'\*\*(.*?)\*\*', r'\1', content)
-    content = re.sub(r'__(.*?)__', r'\1', content)
-    
-    # Remove markdown italic (*text* or _text_)
-    content = re.sub(r'\*(.*?)\*', r'\1', content)
-    content = re.sub(r'_(.*?)_', r'\1', content)
-    
-    # Remove markdown lists (- or * at start of line)
-    content = re.sub(r'^[-\*]\s*', '', content, flags=re.MULTILINE)
-    
-    # Remove extra dashes/separators
-    content = re.sub(r'^-+$', '', content, flags=re.MULTILINE)
-    
-    # Clean up multiple newlines
-    content = re.sub(r'\n\s*\n\s*\n+', '\n\n', content)
-    
-    return content.strip()
+    try:
+        if not content:
+            return ""
+            
+        # Remove markdown headers (# ## ### ####)
+        content = re.sub(r'^#{1,6}\s*', '', content, flags=re.MULTILINE)
+        
+        # Remove markdown bold (**text** or __text__)
+        content = re.sub(r'\*\*(.*?)\*\*', r'\1', content)
+        content = re.sub(r'__(.*?)__', r'\1', content)
+        
+        # Remove markdown italic (*text* or _text_)
+        content = re.sub(r'\*(.*?)\*', r'\1', content)
+        content = re.sub(r'_(.*?)_', r'\1', content)
+        
+        # Remove markdown lists (- or * at start of line)
+        content = re.sub(r'^[-\*]\s*', '', content, flags=re.MULTILINE)
+        
+        # Remove extra dashes/separators
+        content = re.sub(r'^-+$', '', content, flags=re.MULTILINE)
+        
+        # Clean up multiple newlines
+        content = re.sub(r'\n\s*\n\s*\n+', '\n\n', content)
+        
+        return content.strip()
+        
+    except Exception as e:
+        logger.error(f"Content cleaning error: {e}")
+        return content if content else ""
 
 def display_spectacular_welcome_screen():
     """Display spectacular welcome screen"""
@@ -617,235 +640,389 @@ def display_spectacular_welcome_screen():
 
 def display_elegant_menu():
     """Display the interactive menu after getting travel data"""
-    st.markdown(f"""
-    <div class="spectacular-header">
-        <h1>Choose Your Travel Experience</h1>
-        <p class="space-small">Your travel query: <strong>"{st.session_state.user_query}"</strong></p>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    # Create menu grid with beautiful spacing
-    st.markdown('<div class="space-medium"></div>', unsafe_allow_html=True)
-    col1, col2 = st.columns(2)
-    col3, col4 = st.columns(2)
-    col5, col6 = st.columns(2)
-    
-    menu_options = [
-        ("complete", "🗓️ Complete Itinerary", "Full comprehensive travel plan with everything", col1),
-        ("hotels", "🏨 Hotel Recommendations", "Detailed accommodation options and reviews", col2),
-        ("cost", "💰 Cost Breakdown", "Detailed budget analysis with price estimates", col3),
-        ("weather", "🌤️ Weather Information", "Climate details and best travel times", col4),
-        ("alternatives", "🔄 Alternative Plans", "Different options and backup suggestions", col5)
-    ]
-    
-    for option_id, title, description, column in menu_options:
-        with column:
-            st.markdown(f"""
-            <div class="stunning-content space-small">
-                <div class="beautiful-subheading">{title}</div>
-                <div class="premium-text">{description}</div>
-            </div>
-            """, unsafe_allow_html=True)
+    try:
+        st.markdown(f"""
+        <div class="spectacular-header">
+            <h1>Choose Your Travel Experience</h1>
+            <p class="space-small">Your travel query: <strong>"{st.session_state.user_query}"</strong></p>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # Create menu grid with beautiful spacing
+        st.markdown('<div class="space-medium"></div>', unsafe_allow_html=True)
+        col1, col2 = st.columns(2)
+        col3, col4 = st.columns(2)
+        col5, col6 = st.columns(2)
+        
+        menu_options = [
+            ("complete", "🗓️ Complete Itinerary", "Full comprehensive travel plan with everything", col1),
+            ("hotels", "🏨 Hotel Recommendations", "Detailed accommodation options and reviews", col2),
+            ("cost", "💰 Cost Breakdown", "Detailed budget analysis with price estimates", col3),
+            ("weather", "🌤️ Weather Information", "Climate details and best travel times", col4),
+            ("alternatives", "🔄 Alternative Plans", "Different options and backup suggestions", col5)
+        ]
+        
+        for option_id, title, description, column in menu_options:
+            with column:
+                st.markdown(f"""
+                <div class="stunning-content space-small">
+                    <div class="beautiful-subheading">{title}</div>
+                    <div class="premium-text">{description}</div>
+                </div>
+                """, unsafe_allow_html=True)
+                
+                if st.button(f"Explore {title.split()[-1]}", key=f"menu_{option_id}", use_container_width=True):
+                    st.session_state.current_view = option_id
+                    st.session_state.loading = True
+                    st.rerun()
+        
+        # Currency converter in the last column
+        with col6:
+            display_beautiful_currency_converter()
             
-            if st.button(f"Explore {title.split()[-1]}", key=f"menu_{option_id}", use_container_width=True):
-                st.session_state.current_view = option_id
-                st.session_state.loading = True
-                st.rerun()
-    
-    # Currency converter in the last column
-    with col6:
-        display_beautiful_currency_converter()
+    except Exception as e:
+        logger.error(f"Menu display error: {e}")
+        st.error("Error displaying menu. Please refresh the page.")
 
 def display_beautiful_currency_converter():
     """Display beautiful currency converter"""
-    st.markdown("""
-    <div class="beautiful-currency-converter">
-        <div class="beautiful-subheading">💱 Currency</div>
-        <div class="premium-text">Prices in your preferred currency</div>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    currencies = {
-        "USD": "🇺🇸 USD",
-        "INR": "🇮🇳 INR", 
-        "EUR": "🇪🇺 EUR",
-        "GBP": "🇬🇧 GBP",
-        "AUD": "🇦🇺 AUD",
-        "CAD": "🇨🇦 CAD",
-        "JPY": "🇯🇵 JPY"
-    }
-    
-    selected_currency = st.selectbox(
-        "Select Currency:",
-        options=list(currencies.keys()),
-        format_func=lambda x: currencies[x],
-        index=list(currencies.keys()).index(st.session_state.currency) if st.session_state.currency in currencies else 0,
-        key="currency_selector"
-    )
-    
-    if selected_currency != st.session_state.currency:
-        st.session_state.currency = selected_currency
-        st.rerun()
+    try:
+        st.markdown("""
+        <div class="beautiful-currency-converter">
+            <div class="beautiful-subheading">💱 Currency</div>
+            <div class="premium-text">Prices in your preferred currency</div>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        currencies = {
+            "USD": "🇺🇸 USD",
+            "INR": "🇮🇳 INR", 
+            "EUR": "🇪🇺 EUR",
+            "GBP": "🇬🇧 GBP",
+            "AUD": "🇦🇺 AUD",
+            "CAD": "🇨🇦 CAD",
+            "JPY": "🇯🇵 JPY"
+        }
+        
+        current_index = 0
+        if st.session_state.currency in currencies:
+            current_index = list(currencies.keys()).index(st.session_state.currency)
+        
+        selected_currency = st.selectbox(
+            "Select Currency:",
+            options=list(currencies.keys()),
+            format_func=lambda x: currencies[x],
+            index=current_index,
+            key="currency_selector"
+        )
+        
+        if selected_currency != st.session_state.currency:
+            st.session_state.currency = selected_currency
+            st.rerun()
+            
+    except Exception as e:
+        logger.error(f"Currency converter error: {e}")
+        st.error("Error displaying currency converter")
 
 def identify_section_type(content_section):
     """Identify what type of section this is based on content"""
-    content_lower = content_section.lower()
-    
-    if any(keyword in content_lower for keyword in ['hotel', 'accommodation', 'stay', 'lodge', 'resort']):
-        return 'hotel'
-    elif any(keyword in content_lower for keyword in ['cost', 'budget', 'price', 'expense', 'money', '$']):
-        return 'cost'  
-    elif any(keyword in content_lower for keyword in ['weather', 'climate', 'temperature', 'rain', 'sunny']):
-        return 'weather'
-    elif any(keyword in content_lower for keyword in ['activity', 'attraction', 'visit', 'tour', 'museum', 'park']):
-        return 'activity'
-    elif any(keyword in content_lower for keyword in ['day 1', 'day 2', 'day 3', 'morning', 'afternoon', 'evening']):
-        return 'day'
-    else:
+    try:
+        if not content_section:
+            return 'general'
+            
+        content_lower = content_section.lower()
+        
+        if any(keyword in content_lower for keyword in ['hotel', 'accommodation', 'stay', 'lodge', 'resort']):
+            return 'hotel'
+        elif any(keyword in content_lower for keyword in ['cost', 'budget', 'price', 'expense', 'money', '$']):
+            return 'cost'  
+        elif any(keyword in content_lower for keyword in ['weather', 'climate', 'temperature', 'rain', 'sunny']):
+            return 'weather'
+        elif any(keyword in content_lower for keyword in ['activity', 'attraction', 'visit', 'tour', 'museum', 'park']):
+            return 'activity'
+        elif any(keyword in content_lower for keyword in ['day 1', 'day 2', 'day 3', 'morning', 'afternoon', 'evening']):
+            return 'day'
+        else:
+            return 'general'
+            
+    except Exception as e:
+        logger.error(f"Section type identification error: {e}")
         return 'general'
+    
+def filter_content_by_type(content: str, content_type: str):
+    """Enhanced content filtering based on type"""
+    try:
+        if not content:
+            return ""
+            
+        sections = re.split(r'\n\s*\n', content)
+        filtered_sections = []
+        
+        # Define keywords for each content type
+        keywords = {
+            "hotels": [
+                'hotel', 'accommodation', 'stay', 'lodge', 'resort', 'hostel', 'guesthouse', 
+                'booking', 'room', 'suite', 'check-in', 'check-out', 'amenities', 'property',
+                'where to stay', 'places to stay'
+            ],
+            "cost": [
+                'cost', 'budget', 'price', 'expense', 'money', 'fee', 'fare', 'rate',
+                'total', 'amount', 'charges', 'payment', 'affordable', 'cheap', 'expensive',
+                '', '₹', '€', '£', 'currency', 'budget breakdown', 'estimated cost'
+            ],
+            "weather": [
+                'weather', 'climate', 'temperature', 'rain', 'sunny', 'season', 'monsoon',
+                'winter', 'summer', 'spring', 'autumn', 'humidity', 'forecast', 'conditions',
+                'best time to visit', 'climate info', 'when to go'
+            ],
+            "alternatives": [
+                'alternative', 'option', 'instead', 'substitute', 'different', 'other',
+                'choice', 'variation', 'backup', 'plan b', 'consider', 'recommend',
+                'other options', 'alternatives', 'different plan'
+            ]
+        }
+        
+        target_keywords = keywords.get(content_type, [])
+        
+        for section in sections:
+            if not section.strip():
+                continue
+                
+            section_lower = section.lower()
+            
+            # Check if section contains relevant keywords (more lenient matching)
+            if any(keyword in section_lower for keyword in target_keywords):
+                filtered_sections.append(section)
+        
+        return "\n\n".join(filtered_sections)
+        
+    except Exception as e:
+        logger.error(f"Content filtering error: {e}")
+        return content
+
+def display_filtered_content(content: str, content_type: str):
+    """Display filtered content with appropriate styling"""
+    try:
+        if not content:
+            return
+            
+        sections = re.split(r'\n\s*\n', content)
+        
+        # Choose appropriate styling based on content type
+        css_classes = {
+            "hotels": "hotel-section",
+            "cost": "cost-section", 
+            "weather": "weather-section",
+            "alternatives": "stunning-content"
+        }
+        
+        css_class = css_classes.get(content_type, "stunning-content")
+        
+        for section in sections:
+            if not section.strip():
+                continue
+                
+            processed_content = extract_price_ranges(section)
+            st.markdown(f"""
+            <div class="{css_class} space-large">
+                <div class="premium-text">{processed_content.replace(chr(10), '<br><br>')}</div>
+            </div>
+            """, unsafe_allow_html=True)
+            
+    except Exception as e:
+        logger.error(f"Filtered content display error: {e}")
+        st.error("Error displaying content")
 
 def display_gorgeous_itinerary(content: str):
-    """Display itinerary in gorgeous format with proper spacing"""
-    # Split content into sections
-    sections = re.split(r'\n\s*\n', content)
-    
-    for section in sections:
-        if not section.strip():
-            continue
+    """Display itinerary in gorgeous format with proper spacing and section handling"""
+    try:
+        if not content:
+            return
             
-        # Add beautiful spacing between sections
-        st.markdown('<div class="space-medium"></div>', unsafe_allow_html=True)
-        
-        section_type = identify_section_type(section)
-        
-        # Check if it's a day section
-        if re.match(r'Day \d+', section, re.IGNORECASE) or section_type == 'day':
-            lines = section.split('\n')
-            day_title = lines[0].strip()
-            day_content = '\n'.join(lines[1:]).strip() if len(lines) > 1 else ""
-            
-            processed_content = extract_price_ranges(day_content)
-            
-            st.markdown(f"""
-            <div class="gorgeous-day-section space-large">
-                <div class="day-title">🗓️ {day_title}</div>
-                <div class="space-small"></div>
-                <div class="day-content">{processed_content.replace(chr(10), '<br><br>')}</div>
-            </div>
-            """, unsafe_allow_html=True)
-            
-        elif section_type == 'hotel':
-            processed_content = extract_price_ranges(section)
-            st.markdown(f"""
-            <div class="hotel-section space-large">
-                <div class="beautiful-subheading">🏨 Accommodation Recommendations</div>
-                <div class="space-small"></div>
-                <div class="premium-text">{processed_content.replace(chr(10), '<br><br>')}</div>
-            </div>
-            """, unsafe_allow_html=True)
-            
-        elif section_type == 'cost':
-            processed_content = extract_price_ranges(section)
-            st.markdown(f"""
-            <div class="cost-section space-large">
-                <div class="beautiful-subheading">💰 Budget & Costs</div>
-                <div class="space-small"></div>
-                <div class="premium-text">{processed_content.replace(chr(10), '<br><br>')}</div>
-            </div>
-            """, unsafe_allow_html=True)
-            
-        elif section_type == 'weather':
-            processed_content = extract_price_ranges(section)
-            st.markdown(f"""
-            <div class="weather-section space-large">
-                <div class="beautiful-subheading">🌤️ Weather & Climate</div>
-                <div class="space-small"></div>
-                <div class="premium-text">{processed_content.replace(chr(10), '<br><br>')}</div>
-            </div>
-            """, unsafe_allow_html=True)
-            
-        elif section_type == 'activity':
-            processed_content = extract_price_ranges(section)
-            st.markdown(f"""
-            <div class="activity-section space-large">
-                <div class="beautiful-subheading">🎯 Activities & Attractions</div>
-                <div class="space-small"></div>
-                <div class="premium-text">{processed_content.replace(chr(10), '<br><br>')}</div>
-            </div>
-            """, unsafe_allow_html=True)
-            
-        else:
-            # General content section
-            processed_content = extract_price_ranges(section)
-            
-            # Check if section has a title
-            lines = section.split('\n')
-            if lines and len(lines[0]) < 100 and ':' not in lines[0]:
-                title = lines[0].strip()
-                content_text = '\n'.join(lines[1:]).strip() if len(lines) > 1 else ""
-                
+        # Split content into sections
+        sections = re.split(r'\n\s*\n', content)
+
+        for section in sections:
+            if not section.strip():
+                continue
+
+            # Add spacing between sections
+            st.markdown('<div class="space-medium"></div>', unsafe_allow_html=True)
+
+            section_type = identify_section_type(section)
+
+            # Handle "Day" sections
+            if re.match(r'Day \d+', section, re.IGNORECASE) or section_type == 'day':
+                lines = section.split('\n')
+                day_title = lines[0].strip()
+                day_content = '\n'.join(lines[1:]).strip() if len(lines) > 1 else ""
+
+                processed_content = extract_price_ranges(day_content)
+
                 st.markdown(f"""
-                <div class="stunning-content space-large">
-                    <div class="elegant-heading">{title}</div>
+                <div class="gorgeous-day-section space-large">
+                    <div class="day-title">🗓️ {day_title}</div>
                     <div class="space-small"></div>
-                    <div class="premium-text">{extract_price_ranges(content_text).replace(chr(10), '<br><br>')}</div>
+                    <div class="day-content">{processed_content.replace(chr(10), '<br><br>')}</div>
                 </div>
                 """, unsafe_allow_html=True)
-            else:
+
+            # Hotels
+            elif section_type == 'hotel':
+                processed_content = extract_price_ranges(section)
                 st.markdown(f"""
-                <div class="stunning-content space-large">
+                <div class="hotel-section space-large">
+                    <div class="beautiful-subheading">🏨 Accommodation Recommendations</div>
+                    <div class="space-small"></div>
                     <div class="premium-text">{processed_content.replace(chr(10), '<br><br>')}</div>
                 </div>
                 """, unsafe_allow_html=True)
 
+            # Costs
+            elif section_type == 'cost':
+                processed_content = extract_price_ranges(section)
+                st.markdown(f"""
+                <div class="cost-section space-large">
+                    <div class="beautiful-subheading">💰 Budget & Costs</div>
+                    <div class="space-small"></div>
+                    <div class="premium-text">{processed_content.replace(chr(10), '<br><br>')}</div>
+                </div>
+                """, unsafe_allow_html=True)
+
+            # Weather
+            elif section_type == 'weather':
+                processed_content = extract_price_ranges(section)
+                st.markdown(f"""
+                <div class="weather-section space-large">
+                    <div class="beautiful-subheading">🌤️ Weather & Climate</div>
+                    <div class="space-small"></div>
+                    <div class="premium-text">{processed_content.replace(chr(10), '<br><br>')}</div>
+                </div>
+                """, unsafe_allow_html=True)
+
+            # Activities
+            elif section_type == 'activity':
+                processed_content = extract_price_ranges(section)
+                st.markdown(f"""
+                <div class="activity-section space-large">
+                    <div class="beautiful-subheading">🎯 Activities & Attractions</div>
+                    <div class="space-small"></div>
+                    <div class="premium-text">{processed_content.replace(chr(10), '<br><br>')}</div>
+                </div>
+                """, unsafe_allow_html=True)
+
+            # General / fallback sections
+            else:
+                processed_content = extract_price_ranges(section)
+                lines = section.split('\n')
+
+                if lines and len(lines[0]) < 100 and ':' not in lines[0]:
+                    # Section has a short title
+                    title = lines[0].strip()
+                    content_text = '\n'.join(lines[1:]).strip() if len(lines) > 1 else ""
+
+                    st.markdown(f"""
+                    <div class="stunning-content space-large">
+                        <div class="elegant-heading">{title}</div>
+                        <div class="space-small"></div>
+                        <div class="premium-text">{extract_price_ranges(content_text).replace(chr(10), '<br><br>')}</div>
+                    </div>
+                    """, unsafe_allow_html=True)
+                else:
+                    # Plain text block
+                    st.markdown(f"""
+                    <div class="stunning-content space-large">
+                        <div class="premium-text">{processed_content.replace(chr(10), '<br><br>')}</div>
+                    </div>
+                    """, unsafe_allow_html=True)
+                    
+    except Exception as e:
+        logger.error(f"Itinerary display error: {e}")
+        st.error("Error displaying itinerary")
+
 def display_stunning_generic_content(content: str):
     """Display generic content in stunning format"""
-    processed_content = extract_price_ranges(content)
-    st.markdown(f"""
-    <div class="stunning-content space-large">
-        <div class="premium-text">{processed_content.replace(chr(10), '<br><br>')}</div>
-    </div>
-    """, unsafe_allow_html=True)
+    try:
+        if not content:
+            return
+            
+        processed_content = extract_price_ranges(content)
+        st.markdown(f"""
+        <div class="stunning-content space-large">
+            <div class="premium-text">{processed_content.replace(chr(10), '<br><br>')}</div>
+        </div>
+        """, unsafe_allow_html=True)
+        
+    except Exception as e:
+        logger.error(f"Generic content display error: {e}")
+        st.error("Error displaying content")
 
 def display_magnificent_content_page(content_type: str, data: str):
-    """Display content in magnificent format with beautiful spacing"""
-    
-    # Beautiful back button
-    st.markdown('<div class="space-medium"></div>', unsafe_allow_html=True)
-    if st.button("← ✨ Back to Menu", key="back_button", use_container_width=False):
-        st.session_state.current_view = "menu"
-        st.rerun()
-    
-    # Content titles with emojis
-    titles = {
-        "complete": "🗓️ Complete Travel Itinerary",
-        "hotels": "🏨 Hotel Recommendations", 
-        "cost": "💰 Cost Breakdown",
-        "weather": "🌤️ Weather Information",
-        "alternatives": "🔄 Alternative Plans"
-    }
-    
-    title = titles.get(content_type, "✈️ Travel Information")
-    
-    # Spectacular header
-    st.markdown(f"""
-    <div class="spectacular-header space-large">
-        <h1>{title}</h1>
-        <p>Expertly curated travel information for your perfect journey</p>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    # Clean and process content
-    clean_data = clean_content_from_markdown(data)
-    
-    # Display content in magnificent format
-    if content_type == "complete":
-        display_gorgeous_itinerary(clean_data)
-    else:
-        display_stunning_generic_content(clean_data)
-    
-    # Add beautiful spacing at the end
-    st.markdown('<div class="space-large"></div>', unsafe_allow_html=True)
+    """Display content in magnificent format with proper filtering"""
+    try:
+        # Beautiful back button
+        st.markdown('<div class="space-medium"></div>', unsafe_allow_html=True)
+        if st.button("← ✨ Back to Menu", key="back_button", use_container_width=False):
+            st.session_state.current_view = "menu"
+            st.rerun()
+        
+        # Content titles with emojis
+        titles = {
+            "complete": "🗓️ Complete Travel Itinerary",
+            "hotels": "🏨 Hotel Recommendations", 
+            "cost": "💰 Cost Breakdown",
+            "weather": "🌤️ Weather Information",
+            "alternatives": "🔄 Alternative Plans"
+        }
+        
+        title = titles.get(content_type, "✈️ Travel Information")
+        
+        # Spectacular header
+        st.markdown(f"""
+        <div class="spectacular-header space-large">
+            <h1>{title}</h1>
+            <p>Expertly curated travel information for your perfect journey</p>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        if not data or not data.strip():
+            st.markdown("""
+            <div class="stunning-content space-large">
+                <div class="premium-text">No data available for this section.</div>
+            </div>
+            """, unsafe_allow_html=True)
+            return
+        
+        # Clean and process content
+        clean_data = clean_content_from_markdown(data)
+        
+        # Apply filtering based on content type
+        if content_type == "complete":
+            # Show everything for complete itinerary
+            display_gorgeous_itinerary(clean_data)
+        else:
+            # Filter content for specific sections
+            filtered_content = filter_content_by_type(clean_data, content_type)
+            if filtered_content.strip():
+                display_filtered_content(filtered_content, content_type)
+            else:
+                # Fallback: show all content if no specific sections found
+                st.markdown("""
+                <div class="stunning-content space-large">
+                    <div class="premium-text">
+                        <strong>Note:</strong> The content below contains comprehensive information. 
+                        The specific section you requested might be integrated within the overall plan.
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+                display_stunning_generic_content(clean_data)
+        
+        # Add beautiful spacing at the end
+        st.markdown('<div class="space-large"></div>', unsafe_allow_html=True)
+        
+    except Exception as e:
+        logger.error(f"Content page display error: {e}")
+        st.error("Error displaying content page")
 
 def display_content_page(content_type: str, data: str):
     """Display specific content page with back button - MAGNIFICENT VERSION"""
@@ -913,7 +1090,7 @@ def main():
                     </div>
                     """, unsafe_allow_html=True)
                     
-                    if st.button(button_text, use_container_width=True):
+                    if st.button(button_text, key=f"example_{i}", use_container_width=True):
                         st.session_state.user_query = query
                         st.session_state.current_view = "menu"
                         # Get initial travel data
@@ -952,12 +1129,17 @@ def main():
                 </div>
                 """, unsafe_allow_html=True)
                 
-                # Make API request for specific content
-                response_data = make_api_request(st.session_state.user_query, st.session_state.current_view)
+                # For complete itinerary, use existing data if available
+                if st.session_state.current_view == "complete" and st.session_state.travel_data:
+                    response_data = {"answer": st.session_state.travel_data}
+                else:
+                    # Make API request for specific content
+                    response_data = make_api_request(st.session_state.user_query, st.session_state.current_view)
+                
                 st.session_state.loading = False
                 
                 if response_data and response_data.get("answer"):
-                    # Display the specific content
+                    # Display the specific content with filtering
                     display_content_page(st.session_state.current_view, response_data.get("answer"))
                 else:
                     st.markdown("""
@@ -973,7 +1155,7 @@ def main():
                     </div>
                     """, unsafe_allow_html=True)
                     
-                    if st.button("← ✨ Back to Menu"):
+                    if st.button("← ✨ Back to Menu", key="error_back_button"):
                         st.session_state.current_view = "menu"
                         st.rerun()
             else:
@@ -1004,5 +1186,5 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main() 
     
